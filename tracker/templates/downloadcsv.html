@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Expenses</title>
+    <script>
+        // Function to trigger the export process
+        function exportExpenses() {
+            // Assuming you have the correct URL for the API endpoint
+            const apiUrl = '/api/export-expenses/';  // Replace with your actual URL
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM0NDI2OTY4LCJpYXQiOjE3MzQ0MjY2NjgsImp0aSI6IjNkMjk2ZGExYjJhNDQ1YzQ4YjU1MmI3ZTgzZWI5ZjRhIiwidXNlcl9pZCI6NX0.3eExvh21Sf68M1DnivR00tL9C9PYMb0065Qoq5wgPDY'  // Assuming the token is stored in localStorage
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Create a link to trigger the download of the CSV
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = window.URL.createObjectURL(response.blob());
+                    downloadLink.download = 'expenses.csv';
+                    downloadLink.click();
+                } else {
+                    alert('Failed to export expenses. Please try again.',response,'responseeee');
+                }
+            })
+            .catch(error => {
+                console.error('Error exporting expenses:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Export Expenses to CSV</h1>
+    <button onclick="exportExpenses()">Export Expenses</button>
+</body>
+</html>
