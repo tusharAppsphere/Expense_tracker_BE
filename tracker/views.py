@@ -25,9 +25,47 @@ class IsAdminPermission(IsAuthenticated):
 
 
 # ViewSet for Expense
+# class ExpenseViewSet(viewsets.ModelViewSet):
+#     serializer_class = ExpenseSerializer
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         """
+#         Get expenses for the authenticated user, or for all users if the user is an admin.
+#         """
+#         if self.request.user.user_type == 'admin':
+#             return Expense.objects.all()
+#         return Expense.objects.filter(user=self.request.user)
+
+#     def perform_create(self, serializer):
+#         """
+#         Create a new expense entry with the authenticated user.
+#         """
+#         serializer.save(user=self.request.user)
+
+#     @action(detail=False, methods=['get'])
+#     def getCategoryWiseExpense(self,request):
+#         month = request.GET.get('month')
+#         print(month,"monthhh")
+#         expenses = (
+#             Expense.objects.filter(expense_date__month=month)
+#             .values('category__category_name')
+#             .annotate(total_expense=Sum('total_amount'))
+#         )
+
+#         data = [
+#             {
+#                 "category_name": expense['category__category_name'],
+#                 "total_expense": expense['total_expense']
+#             }
+#             for expense in expenses
+#         ]
+
+#         return Response(data)
+
 class ExpenseViewSet(viewsets.ModelViewSet):
     serializer_class = ExpenseSerializer
-    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -39,30 +77,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         return Expense.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        """
-        Create a new expense entry with the authenticated user.
-        """
+        # You can add custom logic for the expense here
         serializer.save(user=self.request.user)
-
-    @action(detail=False, methods=['get'])
-    def getCategoryWiseExpense(self,request):
-        month = request.GET.get('month')
-        print(month,"monthhh")
-        expenses = (
-            Expense.objects.filter(expense_date__month=month)
-            .values('category__category_name')
-            .annotate(total_expense=Sum('total_amount'))
-        )
-
-        data = [
-            {
-                "category_name": expense['category__category_name'],
-                "total_expense": expense['total_expense']
-            }
-            for expense in expenses
-        ]
-
-        return Response(data)
 
 
 # ViewSet for Category (Admin only)
@@ -163,17 +179,12 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 class CustomTokenObtainPairViewSet(viewsets.ViewSet):
-    """
-    Custom ViewSet to return the JWT access and refresh tokens with the user_type.
-    """
+   
 
     permission_classes = [AllowAny]  # No authentication required for login
 
     def create(self, request):
-        """
-        Handle user login, return JWT tokens along with user_type.
-        """
-        # Get username and password from the request data
+        print(f"Request data: {request.data}")
         email = request.data.get('email')
         password = request.data.get('password')
         
@@ -188,9 +199,15 @@ class CustomTokenObtainPairViewSet(viewsets.ViewSet):
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
             
+            
+            # Get the user_type (you can adjust this if user_type is in a related model)
+            user_type = user.user_type  # Or `user.profile.user_type` if user_type is in a related profile model
+            
+            # Return the access and refresh tokens with user_type
             return Response({
                 'access': access_token,
                 'refresh': refresh_token,
+                'user_type': user_type,
                 'user':userdata.data
             })
         

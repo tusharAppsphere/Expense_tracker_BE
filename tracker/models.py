@@ -108,8 +108,6 @@ class SubCategory(models.Model):
 import os
 from django.conf import settings
 
-# Path to the React project's 'src' folder
-# REACT_PROJECT_SRC_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'expense-tracker', 'src')
 
 class Expense(models.Model):
     PAYMENT_MODES = (
@@ -118,24 +116,24 @@ class Expense(models.Model):
         ('online', 'Online'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="expenses")
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="expenses")
     description = models.CharField(max_length=255)
     transaction_image = models.ImageField(
-        upload_to=lambda instance, filename: os.path.join('transaction', filename), 
+        upload_to='transaction_images/', 
         null=True, 
         blank=True
     )
     bill_image = models.ImageField(
-        upload_to=lambda instance, filename: os.path.join('bill',filename), 
+        upload_to='bill_images/', 
         null=True, 
         blank=True
     )
     payment_mode = models.CharField(max_length=50, choices=PAYMENT_MODES)
     price = models.FloatField()
     quantity = models.FloatField()
-    total_amount = models.FloatField()
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    total_amount = models.FloatField(null=True)
+    subcategory = models.ForeignKey('SubCategory', on_delete=models.CASCADE)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
     expense_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
